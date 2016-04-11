@@ -95,7 +95,7 @@ func (m *BlockManager) listenEvent() {
 		if err != nil {
 			panic(err)
 		}
-		m.handleEvent(event)
+		go m.handleEvent(event)
 	}
 
 	// read closing bracket
