@@ -1,5 +1,7 @@
 i3line
 ======
 
-Highly experimental status line for i3, written in Go.
+Highly experimental command status for i3bar.
+
+Documentation coming soon... or not.
 
