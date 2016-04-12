@@ -12,7 +12,7 @@ func main() {
 	defer manager.Close()
 
 	manager.AddBlockModule(modules.SoundModule{"Master"})
-	manager.AddBlockModule(modules.TimeModule{"%H:%M:%S", true})
+	manager.AddBlockModule(modules.TimeModule{"15:04:05", true})
 
 	manager.Run()
 }
