@@ -27,7 +27,7 @@ func (m SoundModule) GenBlock() i3line.Block {
 	vol := str[:strings.Index(str, "]")-1]
 	if on {
 		ivol, _ := strconv.Atoi(vol)
-		if ivol > 50 {
+		if ivol == 80 {
 			str = "🔊 "
 		} else if ivol == 0 {
 			str = "🔈 "
