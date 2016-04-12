@@ -11,8 +11,8 @@ func main() {
 	manager.Init()
 	defer manager.Close()
 
-	manager.AddBlockModule(modules.SoundModule{})
-	manager.AddBlockModule(modules.TimeModule{})
+	manager.AddBlockModule(modules.SoundModule{"Master"})
+	manager.AddBlockModule(modules.TimeModule{"%H:%M:%S", true})
 
 	manager.Run()
 }

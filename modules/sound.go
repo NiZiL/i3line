@@ -8,6 +8,7 @@ import (
 )
 
 type SoundModule struct {
+	Channel string
 }
 
 func (m SoundModule) GetName() string {
@@ -15,7 +16,7 @@ func (m SoundModule) GetName() string {
 }
 
 func (m SoundModule) GenBlock() i3line.Block {
-	cmd := exec.Command("amixer", "sget", "Master")
+	cmd := exec.Command("amixer", "sget", m.Channel)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return i3line.NewErrorBlock(m.GetName(), "local", "error")
@@ -37,19 +38,19 @@ func (m SoundModule) GenBlock() i3line.Block {
 		str = "🔇 "
 	}
 
-	return i3line.NewDefaultBlock(m.GetName(), "Master", str+vol+"%")
+	return i3line.NewDefaultBlock(m.GetName(), m.Channel, str+vol+"%")
 }
 
 func (m SoundModule) OnClick(e i3line.Event) {
 	switch e.Button {
 	case 3:
-		cmd := exec.Command("amixer", "sset", e.Instance, "toggle")
+		cmd := exec.Command("amixer", "sset", m.Channel, "toggle")
 		cmd.Run()
 	case 4:
-		cmd := exec.Command("amixer", "sset", e.Instance, "1+")
+		cmd := exec.Command("amixer", "sset", m.Channel, "1+")
 		cmd.Run()
 	case 5:
-		cmd := exec.Command("amixer", "sset", e.Instance, "1-")
+		cmd := exec.Command("amixer", "sset", m.Channel, "1-")
 		cmd.Run()
 	}
 }

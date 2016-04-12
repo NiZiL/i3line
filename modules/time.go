@@ -3,10 +3,13 @@ package modules
 import (
 	"github.com/NiZiL/i3line"
 	"os/exec"
-	"strconv"
+	"strings"
+	"time"
 )
 
 type TimeModule struct {
+	Format string
+	Clock  bool
 }
 
 func (m TimeModule) GetName() string {
@@ -14,20 +17,29 @@ func (m TimeModule) GetName() string {
 }
 
 func (m TimeModule) GenBlock() i3line.Block {
-	cmd := exec.Command("date", "+%H:%M:%S")
+	cmd := exec.Command("date", "+"+m.Format)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return i3line.NewErrorBlock(m.GetName(), "local", "error")
 	}
 	str := string(out[:len(out)-1])
-	return i3line.NewDefaultBlock(m.GetName(), "local", clockUnicode(str)+" "+str)
+	if m.Clock {
+		str = clockUnicode(m.Format, str) + " " + str
+	}
+	return i3line.NewDefaultBlock(m.GetName(), "local", str)
 }
 
 func (m TimeModule) OnClick(e i3line.Event) {}
 
-func clockUnicode(str string) string {
-	h, _ := strconv.Atoi(str[0:2])
-	m, _ := strconv.Atoi(str[3:5])
+func clockUnicode(layout, value string) string {
+	t, err := time.Parse(strftimeToGo(layout), value)
+	if err != nil {
+		return "x"
+	}
+
+	h := t.Hour()
+	m := t.Minute()
+
 	switch h {
 	case 0:
 		fallthrough
@@ -140,4 +152,23 @@ func clockUnicode(str string) string {
 	default:
 		return "⌚"
 	}
+}
+
+func strftimeToGo(format string) string {
+	return strings.NewReplacer(
+		"%a", "Mon",
+		"%A", "Monday",
+		"%b", "Jan",
+		"%B", "January",
+		"%d", "01",
+		"%e", "1",
+		"%m", "02",
+		"%I", "03",
+		"%l", "3",
+		"%H", "15",
+		"%M", "04",
+		"%S", "05",
+		"%y", "06",
+		"%Y", "2006",
+		"%%", "%").Replace(format)
 }

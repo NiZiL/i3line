@@ -16,17 +16,13 @@ type BlockModule interface {
 
 type BlockManager struct {
 	modules  []BlockModule
-	buf      *bytes.Buffer
 	lastSend string
-	encoder  *json.Encoder
 }
 
 func NewBlockManager() *BlockManager {
 	manager := new(BlockManager)
 	manager.modules = make([]BlockModule, 0)
-	manager.buf = new(bytes.Buffer)
 	manager.lastSend = ""
-	manager.encoder = json.NewEncoder(manager.buf)
 	return manager
 }
 
@@ -50,6 +46,7 @@ func (m *BlockManager) AddBlockModule(module BlockModule) {
 
 func (m *BlockManager) Run() {
 	go func() {
+		//TODO scheduler instead of for loop
 		for {
 			var blocks []Block
 			for _, module := range m.modules {
@@ -62,12 +59,11 @@ func (m *BlockManager) Run() {
 }
 
 func (m *BlockManager) refreshBlocks(blocks []Block) {
-	m.encoder.Encode(blocks)
-	toSend := m.buf.String()
-	m.buf.Reset()
-	if toSend != m.lastSend {
-		fmt.Println(toSend + ",")
-		m.lastSend = toSend
+	buf := new(bytes.Buffer)
+	json.NewEncoder(buf).Encode(blocks)
+	if buf.String() != m.lastSend {
+		fmt.Println(buf.String() + ",")
+		m.lastSend = buf.String()
 	}
 }
 
