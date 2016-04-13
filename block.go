@@ -33,13 +33,13 @@ func NewDefaultBlock(name, instance, text string) Block {
 		"none"}
 }
 
-func NewErrorBlock(name, instance, text string) Block {
+func NewColorBlock(name, instance, text, color string) Block {
 	return Block{
 		name,
 		instance,
 		text,
 		text,
-		"#ff0000",
+		color,
 		"#000000",
 		"#000000",
 		25,
@@ -48,4 +48,8 @@ func NewErrorBlock(name, instance, text string) Block {
 		true,
 		9,
 		"none"}
+}
+
+func NewErrorBlock(name, instance string) Block {
+	return NewColorBlock(name, instance, "error", "#ff0000")
 }

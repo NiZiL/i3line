@@ -19,7 +19,7 @@ func (m SoundModule) GenBlock() i3line.Block {
 	cmd := exec.Command("amixer", "sget", m.Channel)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return i3line.NewErrorBlock(m.GetName(), "local", "error")
+		return i3line.NewErrorBlock(m.GetName(), "local")
 	}
 	str := string(out[1 : len(out)-2])
 	str = str[strings.Index(str, "[")+1:]
@@ -27,7 +27,7 @@ func (m SoundModule) GenBlock() i3line.Block {
 	vol := str[:strings.Index(str, "]")-1]
 	if on {
 		ivol, _ := strconv.Atoi(vol)
-		if ivol == 80 {
+		if ivol > 80 {
 			str = "🔊 "
 		} else if ivol == 0 {
 			str = "🔈 "
