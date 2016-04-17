@@ -9,19 +9,20 @@ import (
 )
 
 type BlockModule interface {
-	GetName() string
 	GenBlock() Block
 	OnClick(Event)
 }
 
 type BlockManager struct {
-	modules  []BlockModule
+	modules  map[string]BlockModule
+	order    []string
 	lastSend string
 }
 
 func NewBlockManager() *BlockManager {
 	manager := new(BlockManager)
-	manager.modules = make([]BlockModule, 0)
+	manager.modules = make(map[string]BlockModule)
+	manager.order = make([]string, 0)
 	manager.lastSend = ""
 	return manager
 }
@@ -35,13 +36,9 @@ func (m *BlockManager) Close() {
 	fmt.Println(`]`)
 }
 
-func (m *BlockManager) AddBlockModule(module BlockModule) {
-	for _, oldModule := range m.modules {
-		if oldModule.GetName() == module.GetName() {
-			panic("Can't have two modules with the same name")
-		}
-	}
-	m.modules = append(m.modules, module)
+func (m *BlockManager) AddBlockModule(name string, module BlockModule) {
+	m.order = append(m.order, name)
+	m.modules[name] = module
 }
 
 func (m *BlockManager) Run() {
@@ -49,8 +46,12 @@ func (m *BlockManager) Run() {
 		//TODO scheduler instead of for loop
 		for {
 			var blocks []Block
-			for _, module := range m.modules {
-				blocks = append(blocks, module.GenBlock())
+			var block Block
+			for _, name := range m.order {
+				block = m.modules[name].GenBlock()
+				block.Name = name
+				block.Instance = name
+				blocks = append(blocks, block)
 			}
 			m.refreshBlocks(blocks)
 		}
@@ -91,20 +92,11 @@ func (m *BlockManager) listenEvent() {
 		if err != nil {
 			panic(err)
 		}
-		go m.handleEvent(event)
+		go m.modules[event.Name].OnClick(event)
 	}
 
 	// read closing bracket
 	if _, err := decoder.Token(); err != nil {
 		panic(err)
-	}
-}
-
-func (m *BlockManager) handleEvent(e Event) {
-	for _, module := range m.modules {
-		if module.GetName() == e.Name {
-			module.OnClick(e)
-			break
-		}
 	}
 }

@@ -16,10 +16,10 @@ type Block struct {
 	Markup              string `json:"markup"`
 }
 
-func NewDefaultBlock(name, instance, text string) Block {
+func NewDefaultBlock(text string) Block {
 	return Block{
-		name,
-		instance,
+		"undefined",
+		"undefined",
 		text,
 		text,
 		"#ffffff",
@@ -33,10 +33,10 @@ func NewDefaultBlock(name, instance, text string) Block {
 		"none"}
 }
 
-func NewColorBlock(name, instance, text, color string) Block {
+func NewColorBlock(text, color string) Block {
 	return Block{
-		name,
-		instance,
+		"undefined",
+		"undefined",
 		text,
 		text,
 		color,
@@ -50,6 +50,6 @@ func NewColorBlock(name, instance, text, color string) Block {
 		"none"}
 }
 
-func NewErrorBlock(name, instance string) Block {
-	return NewColorBlock(name, instance, "error", "#ff0000")
+func NewErrorBlock() Block {
+	return NewColorBlock("error", "#ff0000")
 }

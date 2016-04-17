@@ -10,17 +10,13 @@ type TimeModule struct {
 	Clock  bool
 }
 
-func (m TimeModule) GetName() string {
-	return "time"
-}
-
 func (m TimeModule) GenBlock() i3line.Block {
 	t := time.Now()
 	str := t.Format(m.Format)
 	if m.Clock {
 		str = clockUnicode(t) + " " + str
 	}
-	return i3line.NewDefaultBlock(m.GetName(), "local", str)
+	return i3line.NewDefaultBlock(str)
 }
 
 func (m TimeModule) OnClick(e i3line.Event) {}

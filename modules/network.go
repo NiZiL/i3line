@@ -10,10 +10,6 @@ type NetworkModule struct {
 	len   int
 }
 
-func (m *NetworkModule) GetName() string {
-	return "network"
-}
-
 func (m *NetworkModule) GenBlock() i3line.Block {
 	ifaces, _ := net.Interfaces()
 	//remove loopback interface
@@ -29,10 +25,10 @@ func (m *NetworkModule) GenBlock() i3line.Block {
 	str := iface.Name
 	if len(addrs) > 0 {
 		str = str + ": " + addrs[0].String()
-		return i3line.NewColorBlock(m.GetName(), "all", str, "#00ff00")
+		return i3line.NewColorBlock(str, "#00ff00")
 	} else {
 		str = str + ": down"
-		return i3line.NewColorBlock(m.GetName(), "all", str, "#ff0000")
+		return i3line.NewColorBlock(str, "#ff0000")
 	}
 }
 
