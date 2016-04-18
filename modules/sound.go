@@ -17,10 +17,9 @@ func (m SoundModule) GenBlock() i3line.Block {
 	if err != nil {
 		return i3line.NewErrorBlock()
 	}
-	str := string(out[1 : len(out)-2])
-	str = str[strings.Index(str, "[")+1:]
-	on := strings.Index(str, "on") != -1
-	vol := str[:strings.Index(str, "]")-1]
+	str := string(out)
+	on := strings.Index(str[len(str)-5:], "on") != -1
+	vol := str[strings.Index(str, "[")+1 : strings.Index(str, "]")-1]
 	if on {
 		ivol, _ := strconv.Atoi(vol)
 		if ivol > 80 {

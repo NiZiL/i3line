@@ -5,28 +5,29 @@ import (
 	"time"
 )
 
-type TimeModule struct {
+type DateModule struct {
 	Format string
-	Clock  bool
+	Symbol func() string
 }
 
-func (m TimeModule) GenBlock() i3line.Block {
-	t := time.Now()
-	str := t.Format(m.Format)
-	if m.Clock {
-		str = clockUnicode(t) + " " + str
-	}
+func (m DateModule) GenBlock() i3line.Block {
+	str := m.Symbol() + " " + time.Now().Format(m.Format)
 	return i3line.NewDefaultBlock(str)
 }
 
-func (m TimeModule) OnClick(e i3line.Event) {}
+func (m DateModule) OnClick(e i3line.Event) {}
 
-func clockUnicode(t time.Time) string {
+func SyncClockUnicode() string {
 	clock0 := [24]string{"🕛", "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚", "🕛", "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚"}
 	clock30 := [24]string{"🕧", "🕜", "🕝", "🕞", "🕟", "🕠", "🕡", "🕢", "🕣", "🕤", "🕥", "🕦", "🕧", "🕜", "🕝", "🕞", "🕟", "🕠", "🕡", "🕢", "🕣", "🕤", "🕥", "🕦"}
+	t := time.Now()
 	if t.Minute() < 30 {
 		return clock0[t.Hour()]
 	} else {
 		return clock30[t.Hour()]
 	}
+}
+
+func CalendarUnicode() string {
+	return "📅"
 }
