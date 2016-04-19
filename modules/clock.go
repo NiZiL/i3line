@@ -1,4 +1,4 @@
-package modules
+package i3limod
 
 import (
 	"github.com/NiZiL/i3line"
