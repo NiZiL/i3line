@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/NiZiL/i3line"
 	"github.com/NiZiL/i3line/modules"
+	"time"
 )
 
 func main() {
@@ -11,8 +12,10 @@ func main() {
 	manager.Init()
 	defer manager.Close()
 
-	manager.AddBlockModule(modules.SoundModule{})
-	manager.AddBlockModule(modules.TimeModule{})
+	manager.AddBlockModule("network", &modules.NetworkModule{})
+	manager.AddBlockModule("sound", modules.SoundModule{"Master"})
+	manager.AddBlockModule("date", modules.DateModule{"_2/01/2006", modules.CalendarUnicode})
+	manager.AddBlockModule("time", modules.DateModule{"15:04:05", modules.SyncClockUnicode})
 
-	manager.Run()
+	manager.Run(time.Second)
 }

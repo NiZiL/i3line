@@ -6,27 +6,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 )
 
 type BlockModule interface {
-	GetName() string
 	GenBlock() Block
-	OnClick(Event)
+	OnClick(Event) bool
 }
 
 type BlockManager struct {
-	modules  []BlockModule
-	buf      *bytes.Buffer
-	lastSend string
-	encoder  *json.Encoder
+	modules map[string]BlockModule
+	order   []string
 }
 
 func NewBlockManager() *BlockManager {
 	manager := new(BlockManager)
-	manager.modules = make([]BlockModule, 0)
-	manager.buf = new(bytes.Buffer)
-	manager.lastSend = ""
-	manager.encoder = json.NewEncoder(manager.buf)
+	manager.modules = make(map[string]BlockModule)
+	manager.order = make([]string, 0)
 	return manager
 }
 
@@ -39,36 +35,36 @@ func (m *BlockManager) Close() {
 	fmt.Println(`]`)
 }
 
-func (m *BlockManager) AddBlockModule(module BlockModule) {
-	for _, oldModule := range m.modules {
-		if oldModule.GetName() == module.GetName() {
-			panic("Can't have two modules with the same name")
-		}
-	}
-	m.modules = append(m.modules, module)
+func (m *BlockManager) AddBlockModule(name string, module BlockModule) {
+	m.order = append(m.order, name)
+	m.modules[name] = module
 }
 
-func (m *BlockManager) Run() {
+func (m *BlockManager) Run(refreshRate time.Duration) {
+	m.updateBlocks()
+	c := time.Tick(refreshRate)
 	go func() {
 		for {
-			var blocks []Block
-			for _, module := range m.modules {
-				blocks = append(blocks, module.GenBlock())
+			select {
+			case <-c:
+				m.updateBlocks()
 			}
-			m.refreshBlocks(blocks)
 		}
 	}()
 	m.listenEvent()
 }
 
-func (m *BlockManager) refreshBlocks(blocks []Block) {
-	m.encoder.Encode(blocks)
-	toSend := m.buf.String()
-	m.buf.Reset()
-	if toSend != m.lastSend {
-		fmt.Println(toSend + ",")
-		m.lastSend = toSend
+func (m *BlockManager) updateBlocks() {
+	blocks := make([]Block, len(m.order))
+	for i, modName := range m.order {
+		b := m.modules[modName].GenBlock()
+		b.Name = modName
+		b.Instance = modName
+		blocks[i] = b
 	}
+	buf := new(bytes.Buffer)
+	json.NewEncoder(buf).Encode(blocks)
+	fmt.Println(buf.String() + ",")
 }
 
 type Event struct {
@@ -95,7 +91,7 @@ func (m *BlockManager) listenEvent() {
 		if err != nil {
 			panic(err)
 		}
-		m.handleEvent(event)
+		go m.modules[event.Name].OnClick(event)
 	}
 
 	// read closing bracket
@@ -105,10 +101,7 @@ func (m *BlockManager) listenEvent() {
 }
 
 func (m *BlockManager) handleEvent(e Event) {
-	for _, module := range m.modules {
-		if module.GetName() == e.Name {
-			module.OnClick(e)
-			break
-		}
+	if m.modules[e.Name].OnClick(e) {
+		m.updateBlocks()
 	}
 }

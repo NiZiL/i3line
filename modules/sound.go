@@ -8,25 +8,21 @@ import (
 )
 
 type SoundModule struct {
-}
-
-func (m SoundModule) GetName() string {
-	return "sound"
+	Channel string
 }
 
 func (m SoundModule) GenBlock() i3line.Block {
-	cmd := exec.Command("amixer", "sget", "Master")
+	cmd := exec.Command("amixer", "sget", m.Channel)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return i3line.NewErrorBlock(m.GetName(), "local", "error")
+		return i3line.NewErrorBlock()
 	}
-	str := string(out[1 : len(out)-2])
-	str = str[strings.Index(str, "[")+1:]
-	on := strings.Index(str, "on") != -1
-	vol := str[:strings.Index(str, "]")-1]
+	str := string(out)
+	on := strings.Index(str[len(str)-5:], "on") != -1
+	vol := str[strings.Index(str, "[")+1 : strings.Index(str, "]")-1]
 	if on {
 		ivol, _ := strconv.Atoi(vol)
-		if ivol > 50 {
+		if ivol > 80 {
 			str = "🔊 "
 		} else if ivol == 0 {
 			str = "🔈 "
@@ -37,19 +33,24 @@ func (m SoundModule) GenBlock() i3line.Block {
 		str = "🔇 "
 	}
 
-	return i3line.NewDefaultBlock(m.GetName(), "Master", str+vol+"%")
+	return i3line.NewDefaultBlock(str + vol + "%")
 }
 
-func (m SoundModule) OnClick(e i3line.Event) {
+func (m SoundModule) OnClick(e i3line.Event) bool {
 	switch e.Button {
 	case 3:
-		cmd := exec.Command("amixer", "sset", e.Instance, "toggle")
+		cmd := exec.Command("amixer", "sset", m.Channel, "toggle")
 		cmd.Run()
+		return true
 	case 4:
-		cmd := exec.Command("amixer", "sset", e.Instance, "1+")
+		cmd := exec.Command("amixer", "sset", m.Channel, "1+")
 		cmd.Run()
+		return true
 	case 5:
-		cmd := exec.Command("amixer", "sset", e.Instance, "1-")
+		cmd := exec.Command("amixer", "sset", m.Channel, "1-")
 		cmd.Run()
+		return true
+	default:
+		return false
 	}
 }
