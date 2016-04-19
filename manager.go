@@ -36,6 +36,11 @@ func (m *BlockManager) Close() {
 }
 
 func (m *BlockManager) AddBlockModule(name string, module BlockModule) {
+	for _, modName := range m.order {
+		if modName == name {
+			panic("Two modules with the same name !")
+		}
+	}
 	m.order = append(m.order, name)
 	m.modules[name] = module
 }
@@ -57,14 +62,18 @@ func (m *BlockManager) Run(refreshRate time.Duration) {
 func (m *BlockManager) updateBlocks() {
 	blocks := make([]Block, len(m.order))
 	for i, modName := range m.order {
-		b := m.modules[modName].GenBlock()
-		b.Name = modName
-		b.Instance = modName
-		blocks[i] = b
+		blocks[i] = m.createBlock(modName)
 	}
 	buf := new(bytes.Buffer)
 	json.NewEncoder(buf).Encode(blocks)
 	fmt.Println(buf.String() + ",")
+}
+
+func (m *BlockManager) createBlock(name string) Block {
+	b := m.modules[name].GenBlock()
+	b.Name = name
+	b.Instance = name
+	return b
 }
 
 type Event struct {
@@ -91,7 +100,7 @@ func (m *BlockManager) listenEvent() {
 		if err != nil {
 			panic(err)
 		}
-		go m.modules[event.Name].OnClick(event)
+		go m.handleEvent(event)
 	}
 
 	// read closing bracket
