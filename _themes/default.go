@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/NiZiL/i3line"
 	"github.com/NiZiL/i3line/modules"
+	"time"
 )
 
 func main() {
@@ -16,5 +17,5 @@ func main() {
 	manager.AddBlockModule("date", modules.DateModule{"_2/01/2006", modules.CalendarUnicode})
 	manager.AddBlockModule("time", modules.DateModule{"15:04:05", modules.SyncClockUnicode})
 
-	manager.Run()
+	manager.Run(time.Second)
 }

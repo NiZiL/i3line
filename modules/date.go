@@ -15,7 +15,9 @@ func (m DateModule) GenBlock() i3line.Block {
 	return i3line.NewDefaultBlock(str)
 }
 
-func (m DateModule) OnClick(e i3line.Event) {}
+func (m DateModule) OnClick(e i3line.Event) bool {
+	return false
+}
 
 func SyncClockUnicode() string {
 	clock0 := [24]string{"🕛", "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚", "🕛", "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚"}

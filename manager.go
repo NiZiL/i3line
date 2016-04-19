@@ -6,24 +6,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 )
 
 type BlockModule interface {
 	GenBlock() Block
-	OnClick(Event)
+	OnClick(Event) bool
 }
 
 type BlockManager struct {
-	modules  map[string]BlockModule
-	order    []string
-	lastSend string
+	modules map[string]BlockModule
+	order   []string
 }
 
 func NewBlockManager() *BlockManager {
 	manager := new(BlockManager)
 	manager.modules = make(map[string]BlockModule)
 	manager.order = make([]string, 0)
-	manager.lastSend = ""
 	return manager
 }
 
@@ -41,31 +40,31 @@ func (m *BlockManager) AddBlockModule(name string, module BlockModule) {
 	m.modules[name] = module
 }
 
-func (m *BlockManager) Run() {
+func (m *BlockManager) Run(refreshRate time.Duration) {
+	m.updateBlocks()
+	c := time.Tick(refreshRate)
 	go func() {
-		//TODO scheduler instead of for loop
 		for {
-			var blocks []Block
-			var block Block
-			for _, name := range m.order {
-				block = m.modules[name].GenBlock()
-				block.Name = name
-				block.Instance = name
-				blocks = append(blocks, block)
+			select {
+			case <-c:
+				m.updateBlocks()
 			}
-			m.refreshBlocks(blocks)
 		}
 	}()
 	m.listenEvent()
 }
 
-func (m *BlockManager) refreshBlocks(blocks []Block) {
+func (m *BlockManager) updateBlocks() {
+	blocks := make([]Block, len(m.order))
+	for i, modName := range m.order {
+		b := m.modules[modName].GenBlock()
+		b.Name = modName
+		b.Instance = modName
+		blocks[i] = b
+	}
 	buf := new(bytes.Buffer)
 	json.NewEncoder(buf).Encode(blocks)
-	if buf.String() != m.lastSend {
-		fmt.Println(buf.String() + ",")
-		m.lastSend = buf.String()
-	}
+	fmt.Println(buf.String() + ",")
 }
 
 type Event struct {
@@ -98,5 +97,11 @@ func (m *BlockManager) listenEvent() {
 	// read closing bracket
 	if _, err := decoder.Token(); err != nil {
 		panic(err)
+	}
+}
+
+func (m *BlockManager) handleEvent(e Event) {
+	if m.modules[e.Name].OnClick(e) {
+		m.updateBlocks()
 	}
 }

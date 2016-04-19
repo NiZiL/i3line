@@ -32,20 +32,24 @@ func (m *NetworkModule) GenBlock() i3line.Block {
 	}
 }
 
-func (m *NetworkModule) OnClick(e i3line.Event) {
+func (m *NetworkModule) OnClick(e i3line.Event) bool {
+	res := false
 	switch e.Button {
 	case 1:
 		fallthrough
 	case 4:
 		m.index = m.index + 1
+		res = true
 	case 3:
 		fallthrough
 	case 5:
 		m.index = m.index - 1
+		res = true
 	}
 	if m.index < 0 {
 		m.index = m.len - 1
 	} else if m.index >= m.len {
 		m.index = 0
 	}
+	return res
 }

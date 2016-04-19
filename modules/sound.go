@@ -36,16 +36,21 @@ func (m SoundModule) GenBlock() i3line.Block {
 	return i3line.NewDefaultBlock(str + vol + "%")
 }
 
-func (m SoundModule) OnClick(e i3line.Event) {
+func (m SoundModule) OnClick(e i3line.Event) bool {
 	switch e.Button {
 	case 3:
 		cmd := exec.Command("amixer", "sset", m.Channel, "toggle")
 		cmd.Run()
+		return true
 	case 4:
 		cmd := exec.Command("amixer", "sset", m.Channel, "1+")
 		cmd.Run()
+		return true
 	case 5:
 		cmd := exec.Command("amixer", "sset", m.Channel, "1-")
 		cmd.Run()
+		return true
+	default:
+		return false
 	}
 }
