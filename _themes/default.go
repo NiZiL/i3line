@@ -14,8 +14,8 @@ func main() {
 
 	manager.AddBlockModule("network", &modules.NetworkModule{})
 	manager.AddBlockModule("sound", modules.SoundModule{"Master"})
-	manager.AddBlockModule("date", modules.DateModule{"_2/01/2006", modules.CalendarUnicode})
-	manager.AddBlockModule("time", modules.DateModule{"15:04:05", modules.SyncClockUnicode})
+	manager.AddBlockModule("date", modules.DateModule{"📅 _2/01/2006"})
+	manager.AddBlockModule("clock", modules.ClockModule{})
 
 	manager.Run(time.Second)
 }
