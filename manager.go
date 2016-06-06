@@ -20,22 +20,19 @@ type BlockManager struct {
 	blocks  []Block
 }
 
-func NewBlockManager() *BlockManager {
-	manager := new(BlockManager)
-	manager.modules = make([]BlockModule, 0)
-	return manager
-}
-
 func (m *BlockManager) Init() {
+	manager.modules = make([]BlockModule, 0)
+	// init i3bar protocol
 	fmt.Println(`{ "version": 1, "click_events": true }`)
 	fmt.Println(`[`)
 }
 
 func (m *BlockManager) Close() {
+	// close i3bar protocol
 	fmt.Println(`]`)
 }
 
-func (m *BlockManager) AddBlockModule(module BlockModule) {
+func (m *BlockManager) AddModule(module BlockModule) {
 	m.modules = append(m.modules, module)
 }
 
@@ -45,8 +42,7 @@ func (m *BlockManager) Run(refreshRate time.Duration) {
 
 	m.updateAllBlocks()
 	m.sync()
-	// a simple ticker, will be removed soon
-	// we need something to provide a different refresh rate by modules
+
 	c := time.Tick(refreshRate)
 	go func() {
 		for {
@@ -116,7 +112,10 @@ func (m *BlockManager) listenEvent() {
 }
 
 func (m *BlockManager) handleEvent(e Event) {
-	id, _ := strconv.Atoi(e.Name)
+	id, err := strconv.Atoi(e.Name)
+	if err != nil {
+		panic(err)
+	}
 	if m.modules[id].OnClick(e) {
 		m.updateBlock(id)
 		m.sync()

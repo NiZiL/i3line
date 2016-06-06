@@ -7,15 +7,14 @@ import (
 )
 
 func main() {
-	manager := i3line.NewBlockManager()
-
+	manager := i3line.BlockManager{}
 	manager.Init()
 	defer manager.Close()
 
-	manager.AddBlockModule(&i3limod.NetworkModule{})
-	manager.AddBlockModule(i3limod.SoundModule{"Master"})
-	manager.AddBlockModule(i3limod.DateModule{"📅 _2/01/2006"})
-	manager.AddBlockModule(i3limod.ClockModule{})
+	manager.AddModule(&i3limod.NetworkModule{})
+	manager.AddModule(i3limod.SoundModule{"Master"})
+	manager.AddModule(i3limod.DateModule{"📅 _2/01/2006"})
+	manager.AddModule(i3limod.ClockModule{})
 
 	manager.Run(time.Second)
 }
