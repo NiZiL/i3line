@@ -12,10 +12,10 @@ func main() {
 	manager.Init()
 	defer manager.Close()
 
-	manager.AddBlockModule("network", &i3limod.NetworkModule{})
-	manager.AddBlockModule("sound", i3limod.SoundModule{"Master"})
-	manager.AddBlockModule("date", i3limod.DateModule{"📅 _2/01/2006"})
-	manager.AddBlockModule("clock", i3limod.ClockModule{})
+	manager.AddBlockModule(&i3limod.NetworkModule{})
+	manager.AddBlockModule(i3limod.SoundModule{"Master"})
+	manager.AddBlockModule(i3limod.DateModule{"📅 _2/01/2006"})
+	manager.AddBlockModule(i3limod.ClockModule{})
 
 	manager.Run(time.Second)
 }
