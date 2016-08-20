@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -15,55 +16,65 @@ type BlockModule interface {
 }
 
 type BlockManager struct {
-	modules map[string]BlockModule
-	order   []string
-}
-
-func NewBlockManager() *BlockManager {
-	manager := new(BlockManager)
-	manager.modules = make(map[string]BlockModule)
-	manager.order = make([]string, 0)
-	return manager
+	modules []BlockModule
+	blocks  []Block
 }
 
 func (m *BlockManager) Init() {
+	m.modules = make([]BlockModule, 0)
+	// init i3bar protocol
 	fmt.Println(`{ "version": 1, "click_events": true }`)
 	fmt.Println(`[`)
 }
 
 func (m *BlockManager) Close() {
+	// close i3bar protocol
 	fmt.Println(`]`)
 }
 
-func (m *BlockManager) AddBlockModule(name string, module BlockModule) {
-	m.order = append(m.order, name)
-	m.modules[name] = module
+func (m *BlockManager) AddModule(module BlockModule) {
+	m.modules = append(m.modules, module)
 }
 
 func (m *BlockManager) Run(refreshRate time.Duration) {
-	m.updateBlocks()
+	// init internal blocks buffer
+	m.blocks = make([]Block, len(m.modules))
+
+	m.updateAllBlocks()
+	m.sync()
+
 	c := time.Tick(refreshRate)
 	go func() {
 		for {
 			select {
 			case <-c:
-				m.updateBlocks()
+				m.updateAllBlocks()
+				m.sync()
 			}
 		}
 	}()
 	m.listenEvent()
 }
 
-func (m *BlockManager) updateBlocks() {
-	blocks := make([]Block, len(m.order))
-	for i, modName := range m.order {
-		b := m.modules[modName].GenBlock()
-		b.Name = modName
-		b.Instance = modName
-		blocks[i] = b
+func (m *BlockManager) updateAllBlocks() {
+	for id, module := range m.modules {
+		b := module.GenBlock()
+		b.Name = strconv.Itoa(id)
+		b.Instance = strconv.Itoa(id)
+		m.blocks[id] = b
 	}
+}
+
+func (m *BlockManager) updateBlock(id int) {
+	b := m.modules[id].GenBlock()
+	b.Name = strconv.Itoa(id)
+	b.Instance = strconv.Itoa(id)
+	m.blocks[id] = b
+}
+
+func (m *BlockManager) sync() {
 	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(blocks)
+	json.NewEncoder(buf).Encode(m.blocks)
 	fmt.Println(buf.String() + ",")
 }
 
@@ -91,7 +102,7 @@ func (m *BlockManager) listenEvent() {
 		if err != nil {
 			panic(err)
 		}
-		go m.modules[event.Name].OnClick(event)
+		go m.handleEvent(event)
 	}
 
 	// read closing bracket
@@ -101,7 +112,12 @@ func (m *BlockManager) listenEvent() {
 }
 
 func (m *BlockManager) handleEvent(e Event) {
-	if m.modules[e.Name].OnClick(e) {
-		m.updateBlocks()
+	id, err := strconv.Atoi(e.Name)
+	if err != nil {
+		panic(err)
+	}
+	if m.modules[id].OnClick(e) {
+		m.updateBlock(id)
+		m.sync()
 	}
 }

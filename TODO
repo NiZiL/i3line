@@ -1,2 +1,6 @@
-Network module
-Mount USB module
+Arch packaging (makepkg)
+
+modules:
+- network (!= interfaces)
+- mounting
+- battery

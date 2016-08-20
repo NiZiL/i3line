@@ -1,8 +1,9 @@
 package modules
 
 import (
-	"github.com/NiZiL/i3line"
+	"github.com/NiZiL/i3line/core"
 	"net"
+	"strings"
 )
 
 type NetworkModule struct {
@@ -14,7 +15,7 @@ func (m *NetworkModule) GenBlock() i3line.Block {
 	ifaces, _ := net.Interfaces()
 	//remove loopback interface
 	for i, iface := range ifaces {
-		if iface.Name[0] == 'l' {
+		if strings.Contains(iface.Flags.String(), net.FlagLoopback.String()) {
 			ifaces = append(ifaces[:i], ifaces[i+1:]...)
 		}
 	}
@@ -22,13 +23,14 @@ func (m *NetworkModule) GenBlock() i3line.Block {
 
 	iface := ifaces[m.index]
 	addrs, _ := iface.Addrs()
-	str := iface.Name
+	str := "<span font_size='x-small'>" + iface.Name + ": </span>"
 	if len(addrs) > 0 {
-		str = str + ": " + addrs[0].String()
-		return i3line.NewColorBlock(str, "#00ff00")
+		ip := addrs[0].String()
+		str = str + "<span foreground='green'>" + ip[:len(ip)-3] + "</span><span foreground='grey'>" + ip[len(ip)-3:] + "</span>"
+		return i3line.NewPangoBlock(str)
 	} else {
-		str = str + ": down"
-		return i3line.NewColorBlock(str, "#ff0000")
+		str = str + "<span foreground='red'>down</span>"
+		return i3line.NewPangoBlock(str)
 	}
 }
 

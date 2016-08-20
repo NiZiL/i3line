@@ -33,6 +33,23 @@ func NewDefaultBlock(text string) Block {
 		"none"}
 }
 
+func NewPangoBlock(text string) Block {
+	return Block{
+		"undefined",
+		"undefined",
+		text,
+		text,
+		"#ffffff",
+		"#000000",
+		"#000000",
+		25,
+		"left",
+		false,
+		true,
+		9,
+		"pango"}
+}
+
 func NewColorBlock(text, color string) Block {
 	return Block{
 		"undefined",
