@@ -21,7 +21,7 @@ type BlockManager struct {
 }
 
 func (m *BlockManager) Init() {
-	manager.modules = make([]BlockModule, 0)
+	m.modules = make([]BlockModule, 0)
 	// init i3bar protocol
 	fmt.Println(`{ "version": 1, "click_events": true }`)
 	fmt.Println(`[`)

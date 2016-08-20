@@ -1,7 +1,7 @@
-package i3limod
+package modules
 
 import (
-	"github.com/NiZiL/i3line"
+	"github.com/NiZiL/i3line/core"
 	"os/exec"
 	"strconv"
 	"strings"
