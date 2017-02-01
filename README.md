@@ -1,7 +1,6 @@
 i3line
 ======
 
-Highly experimental command status for i3bar.
+Highly personnal command status for i3bar.
 
-Documentation coming soon... or not.
-
+Mainly developped to learn go.
